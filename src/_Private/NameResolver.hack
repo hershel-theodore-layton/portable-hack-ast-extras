@@ -10,6 +10,7 @@ final class NameResolver {
    * Then, by reasoning about the ancestors, determine the kind.
    */
   private (function(Pha\Node)[]: bool)
+    $isAsIsContext,
     $isFunctionContext,
     $isQualifiedName,
     $isTypeContext;
@@ -22,6 +23,8 @@ final class NameResolver {
     private keyset<string> $autoImportedFunctions,
     private keyset<string> $autoImportedTypes,
   )[] {
+    $this->isAsIsContext =
+      Pha\create_syntax_matcher($script, Pha\KIND_PREFIXED_STRING);
     $this->isFunctionContext = Pha\create_syntax_matcher(
       $script,
       Pha\KIND_FUNCTION_CALL_EXPRESSION,
@@ -46,6 +49,10 @@ final class NameResolver {
   )[]: (string, NillableSyntax) {
     if (Str\starts_with($compressed_code, '\\')) {
       return tuple(Str\strip_prefix($compressed_code, '\\'), NIL);
+    }
+
+    if (($this->isAsIsContext)($parent)) {
+      return tuple($compressed_code, NIL);
     }
 
     $resolved_name = idx($this->resolvedNames, node_get_id($name));
