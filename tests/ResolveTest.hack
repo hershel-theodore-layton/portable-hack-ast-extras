@@ -130,7 +130,7 @@ final class ResolveTest extends HackTest {
         'namespace A; function contexts()[write_props]: void {}',
         'write_props',
       ),
-      tuple('namespace A; function regex(): void { re"/a/"; }', "re"),
+      tuple('namespace A; function regex(): void { re"/a/"; }', 're'),
       tuple(
         'namespace A; use type My\Dsl; function dsl(): void { Dsl`1`; }',
         'My\\Dsl',
