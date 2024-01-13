@@ -13,7 +13,8 @@ final class NameResolver {
     $isAsIsContext,
     $isFunctionContext,
     $isQualifiedName,
-    $isTypeContext;
+    $isTypeContext,
+    $isValidName;
 
   public function __construct(
     Pha\Script $script,
@@ -40,13 +41,31 @@ final class NameResolver {
       Pha\KIND_SIMPLE_TYPE_SPECIFIER,
       Pha\KIND_TYPE_PARAMETER,
     );
+    $this->isValidName = Pha\create_matcher(
+      $script,
+      vec[Pha\KIND_QUALIFIED_NAME],
+      vec[Pha\KIND_NAME],
+      vec[],
+    );
   }
 
   public function resolveName(
     Pha\Node $name,
-    Pha\Syntax $parent,
+    vec<Pha\Syntax> $ancestors,
     string $compressed_code,
+    Pha\Kind $node_kind_for_exception,
   )[]: (string, NillableSyntax) {
+    $parent = $ancestors[0];
+    $name = C\find($ancestors, $this->isQualifiedName) ?? $name;
+
+    if (!($this->isValidName)($name)) {
+      throw new PhaException(Str\format(
+        '%s expected a name token a part of a qualified name, got: %s',
+        __METHOD__,
+        $node_kind_for_exception,
+      ));
+    }
+
     if (Str\starts_with($compressed_code, '\\')) {
       return tuple(Str\strip_prefix($compressed_code, '\\'), NIL);
     }
