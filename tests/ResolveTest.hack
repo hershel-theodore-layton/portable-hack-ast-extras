@@ -126,6 +126,10 @@ final class ResolveTest extends HackTest {
         'namespace A; use Please\Dont; function func1(): Dont { }',
         'Please\Dont',
       ),
+      tuple(
+        'namespace A; function contexts()[write_props]: void {}',
+        'write_props',
+      ),
 
       tuple(
         // Invariant pseudo syntax
