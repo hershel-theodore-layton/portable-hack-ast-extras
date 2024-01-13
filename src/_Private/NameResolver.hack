@@ -60,9 +60,10 @@ final class NameResolver {
 
     if (!($this->isValidName)($name)) {
       throw new PhaException(Str\format(
-        '%s expected a name token a part of a qualified name, got: %s',
+        '%s expected a name token a part of a qualified name, got: %s %s',
         __METHOD__,
         $node_kind_for_exception,
+        $compressed_code,
       ));
     }
 
