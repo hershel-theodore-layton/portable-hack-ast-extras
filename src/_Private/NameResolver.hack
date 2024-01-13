@@ -53,18 +53,12 @@ final class NameResolver {
     Pha\Node $name,
     vec<Pha\Syntax> $ancestors,
     string $compressed_code,
-    Pha\Kind $node_kind_for_exception,
   )[]: (string, NillableSyntax) {
     $parent = $ancestors[0];
     $name = C\find($ancestors, $this->isQualifiedName) ?? $name;
 
     if (!($this->isValidName)($name)) {
-      throw new PhaException(Str\format(
-        '%s expected a name token a part of a qualified name, got: %s %s',
-        __METHOD__,
-        $node_kind_for_exception,
-        $compressed_code,
-      ));
+      return tuple($compressed_code, NIL);
     }
 
     if (Str\starts_with($compressed_code, '\\')) {
