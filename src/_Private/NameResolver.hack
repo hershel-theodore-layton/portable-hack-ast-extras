@@ -49,14 +49,20 @@ final class NameResolver {
     );
   }
 
+  public function bubbleQualifiedName(
+    Pha\Node $name,
+    vec<Pha\Syntax> $ancestors,
+  )[]: Pha\Node {
+    return C\find($ancestors, $this->isQualifiedName) ?? $name;
+  }
+
+
   public function resolveName(
     Pha\Node $name,
     vec<Pha\Syntax> $ancestors,
     string $compressed_code,
   )[]: (string, NillableSyntax) {
     $parent = $ancestors[0];
-    $name = C\find($ancestors, $this->isQualifiedName) ?? $name;
-
     if (!($this->isValidName)($name)) {
       return tuple($compressed_code, NIL);
     }

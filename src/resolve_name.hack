@@ -18,9 +18,12 @@ function resolve_name_and_use_clause(
     return tuple('', NIL);
   }
 
-  return _Private\resolver_reveal($resolver)->resolveName(
-    _Private\cast_away_nil($node),
-    node_get_syntax_ancestors($script, $node),
-    node_get_code_compressed($script, $node),
-  );
+  $node = _Private\cast_away_nil($node);
+
+  $resolver = _Private\resolver_reveal($resolver);
+  $ancestors = node_get_syntax_ancestors($script, $node);
+  $node = $resolver->bubbleQualifiedName($node, $ancestors);
+  $compressed_code = node_get_code_compressed($script, $node);
+
+  return $resolver->resolveName($node, $ancestors, $compressed_code);
 }
