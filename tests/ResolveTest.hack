@@ -170,7 +170,6 @@ final class ResolveTest extends HackTest {
 
     $name = Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME)
       |> C\lastx($$)
-      |> C\find(Pha\node_get_ancestors($script, $$), $is_qualified_name) ?? $$
       |> Pha\resolve_name($resolver, $script, $$);
 
     expect($name)->toEqual($expected_name);
