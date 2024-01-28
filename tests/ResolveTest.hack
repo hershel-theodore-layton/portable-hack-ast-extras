@@ -165,8 +165,6 @@ final class ResolveTest extends HackTest {
     string $expected_name,
   )[]: void {
     list($script, $token_index, $resolver) = static::parse($code);
-    $is_qualified_name =
-      Pha\create_syntax_matcher($script, Pha\KIND_QUALIFIED_NAME);
 
     $name = Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME)
       |> C\lastx($$)
