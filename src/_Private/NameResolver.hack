@@ -56,7 +56,6 @@ final class NameResolver {
     return C\find($ancestors, $this->isQualifiedName) ?? $name;
   }
 
-
   public function resolveName(
     Pha\Node $name,
     vec<Pha\Syntax> $ancestors,
