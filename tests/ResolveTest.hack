@@ -90,7 +90,7 @@ final class ResolveTest extends HackTest {
 
       tuple(
         // Generics are resolved as-if they were normal names in the namespace.
-        // The caller is responsible for bookinging bound names in scope.
+        // The caller is responsible for bookkeeing bound names in scope.
         'namespace Some\Name\Space; function func1<T>(): T {}',
         'Some\Name\Space\T',
       ),
