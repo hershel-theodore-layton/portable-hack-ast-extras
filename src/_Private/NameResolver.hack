@@ -14,7 +14,8 @@ final class NameResolver {
     $isFunctionContext,
     $isQualifiedName,
     $isTypeContext,
-    $isValidName;
+    $isValidName,
+    $isXhp;
 
   public function __construct(
     Pha\Script $script,
@@ -44,8 +45,13 @@ final class NameResolver {
     $this->isValidName = Pha\create_matcher(
       $script,
       vec[Pha\KIND_QUALIFIED_NAME],
-      vec[Pha\KIND_NAME],
+      vec[Pha\KIND_NAME, Pha\KIND_XHP_CLASS_NAME, Pha\KIND_XHP_ELEMENT_NAME],
       vec[],
+    );
+    $this->isXhp = Pha\create_token_matcher(
+      $script,
+      Pha\KIND_XHP_CLASS_NAME,
+      Pha\KIND_XHP_ELEMENT_NAME,
     );
   }
 
@@ -66,6 +72,11 @@ final class NameResolver {
       return tuple($compressed_code, NIL);
     }
 
+    // xhp names are a special case, they use `:` as a namespace separator.
+    // By making those names look like regular qualified names,
+    // we can treat them as normal names for the purposes of resolving names.
+    $compressed_code = Str\replace($compressed_code, ':', '\\');
+
     if (Str\starts_with($compressed_code, '\\')) {
       return tuple(Str\strip_prefix($compressed_code, '\\'), NIL);
     }
@@ -79,7 +90,7 @@ final class NameResolver {
       return tuple($resolved_name, NIL);
     }
 
-    $kind = $this->determineKind($name, $parent);
+    $kind = $this->determineKind($name, $parent, $compressed_code);
 
     if ($kind === UseKind::TYPE && static::isBuiltinType($compressed_code)) {
       return tuple($compressed_code, NIL);
@@ -140,9 +151,16 @@ final class NameResolver {
   private function determineKind(
     Pha\Node $node,
     Pha\Syntax $parent,
+    string $compressed_code,
   )[]: UseKind {
     if (($this->isQualifiedName)($node)) {
       return UseKind::NAMESPACE;
+    }
+
+    if (($this->isXhp)($node)) {
+      return Str\contains($compressed_code, '\\')
+        ? UseKind::NAMESPACE
+        : UseKind::TYPE;
     }
 
     if (($this->isFunctionContext)($parent)) {

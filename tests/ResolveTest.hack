@@ -89,8 +89,33 @@ final class ResolveTest extends HackTest {
       ),
 
       tuple(
-        'namespace MyApp; use type HTML\div; function func1(): mixed { return <div /> }',
-        'HTML\div',
+        'namespace MyApp; use type HT\ML\div; function func1(): mixed { return <div /> }',
+        'HT\ML\div',
+      ),
+      tuple(
+        'namespace MyApp; use namespace HT\ML; function func1(): mixed { return <ML:div /> }',
+        'HT\ML\div',
+      ),
+      tuple(
+        'namespace MyApp; function func1(): mixed { return <:HT:ML:div /> }',
+        'HT\ML\div',
+      ),
+      tuple(
+        'namespace MyApp; use type HT\ML\div; function func1(): div {}',
+        'HT\ML\div',
+      ),
+      // The test case `function func1(): ML:div {}` is intentionally missing.
+      // This is a parse error in the Hack typechecker.
+      tuple('namespace MyApp; function func1(): :HT:ML:div {}', 'HT\ML\div'),
+
+      tuple('namespace MyApp; final xhp class Element {}', 'MyApp\Element'),
+      tuple(
+        'namespace MyApp; final xhp class Ui:Element {}',
+        'MyApp\Ui\Element',
+      ),
+      tuple(
+        'namespace MyApp; final xhp class Element { attribute :HT:ML:div; }',
+        'HT\ML\div',
       ),
 
       tuple(
@@ -172,6 +197,7 @@ final class ResolveTest extends HackTest {
     list($script, $token_index, $resolver) = static::parse($code);
 
     $name = Vec\concat(
+      Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_CLASS_NAME),
       Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_ELEMENT_NAME),
       Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME),
     )
