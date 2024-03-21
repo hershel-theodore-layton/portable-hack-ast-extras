@@ -2,7 +2,7 @@
 namespace HTL\Pha\Tests;
 
 use type Facebook\HackTest\{DataProvider, HackTest};
-use namespace HH\Lib\C;
+use namespace HH\Lib\{C, Vec};
 use namespace HTL\Pha;
 
 final class ResolveTest extends HackTest {
@@ -89,6 +89,11 @@ final class ResolveTest extends HackTest {
       ),
 
       tuple(
+        'namespace MyApp; use type HTML\div; function func1(): mixed { return <div /> }',
+        'HTML\div',
+      ),
+
+      tuple(
         // Generics are resolved as-if they were normal names in the namespace.
         // The caller is responsible for bookkeeping bound names in scope.
         'namespace Some\Name\Space; function func1<T>(): T {}',
@@ -166,7 +171,11 @@ final class ResolveTest extends HackTest {
   )[]: void {
     list($script, $token_index, $resolver) = static::parse($code);
 
-    $name = Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME)
+    $name = Vec\concat(
+      Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_ELEMENT_NAME),
+      Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME),
+    )
+      |> Vec\sort_by($$, Pha\node_get_source_order<>)
       |> C\lastx($$)
       |> Pha\resolve_name($resolver, $script, $$);
 
