@@ -1,1 +1,0 @@
-/** portable-hack-ast-extras is MIT licensed, see /LICENSE. */
