@@ -57,17 +57,20 @@ function create_name_resolver(
   $get_function_name = create_member_accessor($script, MEMBER_FUNCTION_NAME);
   $get_namespace_body = create_member_accessor($script, MEMBER_NAMESPACE_BODY);
   $get_namespace_declarations =
-    create_member_accessor($script, MEMBER_NAMESPACE_DECLARATIONS);
+    create_member_accessor($script, MEMBER_NAMESPACE_DECLARATIONS)
+    |> returns_syntax($$);
   $get_namespace_group_use_prefix =
     create_member_accessor($script, MEMBER_NAMESPACE_GROUP_USE_PREFIX);
   $get_namespace_header =
-    create_member_accessor($script, MEMBER_NAMESPACE_HEADER);
+    create_member_accessor($script, MEMBER_NAMESPACE_HEADER)
+    |> returns_syntax($$);
   $get_namespace_name = create_member_accessor($script, MEMBER_NAMESPACE_NAME);
   $get_namespace_use_clauses = create_member_accessor(
     $script,
     MEMBER_NAMESPACE_USE_CLAUSES,
     MEMBER_NAMESPACE_GROUP_USE_CLAUSES,
-  );
+  )
+    |> returns_syntax($$);
   $get_namespace_use_alias =
     create_member_accessor($script, MEMBER_NAMESPACE_USE_ALIAS);
   $get_namespace_use_name =
@@ -105,7 +108,6 @@ function create_name_resolver(
       }
 
       $make_use_infos_for_kind = ($kind) ==> $get_namespace_use_clauses($use)
-        |> as_syntax($$)
         |> list_get_items_of_children($script, $$)
         |> Vec\map($$, as_syntax<>)
         |> Vec\map(
@@ -151,16 +153,13 @@ function create_name_resolver(
       |> Vec\map($$, $n ==> {
         $scope = $get_namespace_body($n)
           |> $is_namespace_body($$)
-            ? as_syntax($$)
-              |> $get_namespace_declarations($$)
-              |> as_syntax($$)
+            ? as_syntax($$) |> $get_namespace_declarations($$)
             : $declaration_list;
 
         $uses = node_get_children($script, $scope)
           |> Vec\filter($$, $is_namespace_use_or_group_use_declaration);
 
         $name = $get_namespace_header($n)
-          |> as_syntax($$)
           |> $get_namespace_name($$)
           |> node_get_code_compressed($script, $$).'\\';
 

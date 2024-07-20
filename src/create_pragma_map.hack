@@ -13,15 +13,18 @@ function create_pragma_map(
     create_syntax_matcher($script, KIND_EXPRESSION_STATEMENT);
 
   $get_function_call_arguments =
-    create_member_accessor($script, MEMBER_FUNCTION_CALL_ARGUMENT_LIST);
+    create_member_accessor($script, MEMBER_FUNCTION_CALL_ARGUMENT_LIST)
+    |> returns_syntax($$);
   $get_function_call_receiver =
     create_member_accessor($script, MEMBER_FUNCTION_CALL_RECEIVER);
   $get_constructor_arguments =
-    create_member_accessor($script, MEMBER_CONSTRUCTOR_CALL_ARGUMENT_LIST);
+    create_member_accessor($script, MEMBER_CONSTRUCTOR_CALL_ARGUMENT_LIST)
+    |> returns_syntax($$);
   $get_constructor_type =
     create_member_accessor($script, MEMBER_CONSTRUCTOR_CALL_TYPE);
   $get_vec_members =
-    create_member_accessor($script, MEMBER_VECTOR_INTRINSIC_MEMBERS);
+    create_member_accessor($script, MEMBER_VECTOR_INTRINSIC_MEMBERS)
+    |> returns_syntax($$);
 
   $parse_arguments = $node_list ==>
     list_get_items_of_children($script, $node_list)
@@ -45,14 +48,11 @@ function create_pragma_map(
     $effects = Vec\map(
       $pragmas,
       $p ==> $get_constructor_arguments($p)
-        |> as_syntax($$)
         |> list_get_items_of_children($script, $$)
         |> Vec\map(
           $$,
-          $vec ==> as_syntax($vec)
-            |> $get_vec_members($$)
-            |> as_syntax($$)
-            |> $parse_arguments($$),
+          $vec ==>
+            as_syntax($vec) |> $get_vec_members($$) |> $parse_arguments($$),
         ),
     );
 
@@ -89,9 +89,7 @@ function create_pragma_map(
 
     $effects = Vec\map(
       $pragmas,
-      $p ==> $get_function_call_arguments($p)
-        |> as_syntax($$)
-        |> $parse_arguments($$),
+      $p ==> $get_function_call_arguments($p) |> $parse_arguments($$),
     );
 
     return _Private\three_way_zip(
