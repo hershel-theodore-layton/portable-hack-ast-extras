@@ -107,7 +107,7 @@ function create_name_resolver(
         $prefix = '';
       }
 
-      $make_use_infos_for_kind = ($kind) ==> $get_namespace_use_clauses($use)
+      $make_use_infos_for_kind = $kind ==> $get_namespace_use_clauses($use)
         |> list_get_items_of_children($script, $$)
         |> Vec\map($$, as_syntax<>)
         |> Vec\map(
