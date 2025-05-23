@@ -1,7 +1,6 @@
 /** portable-hack-ast-extras is MIT licensed, see /LICENSE. */
 namespace HTL\Pha\Tests;
 
-use type Facebook\HackTest\ExpectationFailedException;
 use namespace HH\Lib\{Str, Vec};
 use namespace HTL\Pha;
 
@@ -110,6 +109,6 @@ final class ExpectObj<T> {
     Str\SprintfFormatString $format,
     mixed ...$args
   )[]: nothing {
-    throw new ExpectationFailedException(\vsprintf($format, $args));
+    throw new \RuntimeException(\vsprintf($format, $args));
   }
 }

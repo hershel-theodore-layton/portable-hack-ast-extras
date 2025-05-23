@@ -1,0 +1,7 @@
+{
+    "chain_path": "tests/test-chain/chain.hack",
+    "chain_type": "\\HTL\\TestChain\\Chain",
+    "codegen_namespace": "HTL\\Project_qkfwww9J6CQJ\\GeneratedTestChain",
+    "license_comment": "/** portable-hack-ast-extras is MIT licensed, see /LICENSE. */",
+    "run_file": "tests/test-chain/run.hack"
+}
