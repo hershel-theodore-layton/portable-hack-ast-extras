@@ -6,10 +6,7 @@
     "hhvm": "^4.102",
     "hershel-theodore-layton/portable-hack-ast": "<1 || dev-master"
   },
-  "require-dev": {
-    "hhvm/hhvm-autoload": "^3.2",
-    "hhvm/hacktest": "^2.3"
-  },
+  "require-dev": {},
   "scripts": {
     "post-install-cmd": [
       ".github/workflows/prepare-environment.sh"
