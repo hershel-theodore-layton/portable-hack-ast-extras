@@ -4,6 +4,7 @@ namespace HTL\Pha\Tests;
 use namespace HH\Lib\{C, Vec};
 use namespace HTL\{Pha, TestChain};
 
+<<TestChain\Discover>>
 function resolve_test(TestChain\Chain $chain)[]: TestChain\Chain {
   return $chain->group(__FUNCTION__)
     ->testWith2Params(

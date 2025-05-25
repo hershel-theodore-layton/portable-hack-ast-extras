@@ -3,7 +3,7 @@
   "description": "Extra utilities for use with portable-hack-ast.",
   "license": "MIT",
   "require": {
-    "hhvm": "^4.102",
+    "hhvm": ">=4.102",
     "hershel-theodore-layton/portable-hack-ast": "<1 || dev-master"
   },
   "require-dev": {},
