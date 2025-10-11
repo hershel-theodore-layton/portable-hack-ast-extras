@@ -3,6 +3,7 @@ namespace HTL\Pha\Tests;
 
 use namespace HH\Lib\{Str, Vec};
 use namespace HTL\Pha;
+use function var_export_pure;
 
 /**
  * This is not fbexpect!
@@ -84,7 +85,7 @@ final class ExpectObj<T> {
     }
 
     if ($value is string) {
-      return static::stringExportPure($value);
+      return var_export_pure($value);
     }
 
     if ($value is vec<_>) {
@@ -95,14 +96,6 @@ final class ExpectObj<T> {
     }
 
     invariant_violation('Sorry, I can not show you a diff...');
-  }
-
-  /**
-   * @see https://github.com/hershel-theodore-layton/static-type-assertion-code-generator/blob/master/src/_Private/string_export.hack
-   */
-  private static function stringExportPure(string $string)[]: string {
-    return Str\replace_every($string, dict['\\' => '\\\\', "'" => "\'"])
-      |> "'".$$."'";
   }
 
   private static function fail(
