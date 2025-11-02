@@ -85,7 +85,7 @@ final class ExpectObj<T> {
     }
 
     if ($value is string) {
-      return var_export_pure($value);
+      return var_export_pure($value) as string;
     }
 
     if ($value is vec<_>) {
@@ -102,6 +102,6 @@ final class ExpectObj<T> {
     Str\SprintfFormatString $format,
     mixed ...$args
   )[]: nothing {
-    throw new \RuntimeException(\vsprintf($format, $args));
+    throw new \RuntimeException(\vsprintf($format, $args) as string);
   }
 }
