@@ -10,15 +10,15 @@ use type HTL\Pha\_Private\{NameResolver, NamespaceResolution, UseInfo, UseKind};
  * So for example, mapping `Vec` to `HH\Lib\Vec` acts as if every file started
  * with `if (!exists(use clause "Vec")) use namespace HH\Lib\Vec as Vec;`.
  * You can pass the result of `\ini_get("hhvm.aliased_namespaces")` to make
- * `resolve_names` take your pre resolved names into account.
+ * `resolve_name` take your pre-resolved names into account.
  *
  * @param $auto_imported_functions a list of functions that are available in any
- * hack file without an explicit use clause. If your hhvm version has different
- * auto imported names, and you care, you can pass a different list of names.
+ * Hack file without an explicit use clause. If your HHVM version has different
+ * auto-imported names, and you care, you can pass a different list of names.
  *
  * @param $auto_imported_types a list of types that are available in any
- * hack file without an explicit use clause. If your hhvm version has different
- * auto imported names, and you care, you can pass a different list of names.
+ * Hack file without an explicit use clause. If your HHVM version has different
+ * auto-imported names, and you care, you can pass a different list of names.
  */
 function create_name_resolver(
   Script $script,
@@ -51,7 +51,7 @@ function create_name_resolver(
     KIND_NAMESPACE_USE_DECLARATION,
     KIND_NAMESPACE_GROUP_USE_DECLARATION,
   );
-  $is_qualfied_name = create_syntax_matcher($script, KIND_QUALIFIED_NAME);
+  $is_qualified_name = create_syntax_matcher($script, KIND_QUALIFIED_NAME);
   $is_type = create_token_matcher($script, KIND_TYPE);
 
   $get_function_name = create_member_accessor($script, MEMBER_FUNCTION_NAME);
@@ -311,7 +311,7 @@ function create_name_resolver(
     |> Vec\map(
       $$,
       $n ==> node_get_ancestors($script, $n)
-        |> C\find($$, $is_qualfied_name) ?? $n,
+        |> C\find($$, $is_qualified_name) ?? $n,
     )
     |> Vec\unique_by($$, node_get_id<>)
     |> Dict\pull($$, $resolve_name, node_get_id<>)

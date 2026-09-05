@@ -72,7 +72,7 @@ final class NameResolver {
       return tuple($compressed_code, NIL);
     }
 
-    // xhp names are a special case, they use `:` as a namespace separator.
+    // XHP names are a special case, they use `:` as a namespace separator.
     // By making those names look like regular qualified names,
     // we can treat them as normal names for the purposes of resolving names.
     $compressed_code = Str\replace($compressed_code, ':', '\\');
@@ -125,9 +125,9 @@ final class NameResolver {
     }
 
     if ($kind === UseKind::NAMESPACE) {
-      $aliassed_namespace = idx($this->aliasedNamespaces, $first_part);
-      if ($aliassed_namespace is nonnull) {
-        return tuple($aliassed_namespace.$suffix, NIL);
+      $aliased_namespace = idx($this->aliasedNamespaces, $first_part);
+      if ($aliased_namespace is nonnull) {
+        return tuple($aliased_namespace.$suffix, NIL);
       }
     }
 

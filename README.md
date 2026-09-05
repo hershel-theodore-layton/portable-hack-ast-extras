@@ -6,11 +6,8 @@ _Extra utilities for use with portable-hack-ast._
 
 _Why is this not part of portable-hack-ast?_
 
-Portable Hack AST should rarely need new feature updates.
-Chances are small, but not zero, that the AST has a breaking change.
-This would mean that portable-hack-ast would have two incompatible versions.
+I had assumed that upgrading to HHVM 6.33+ (in Meta's version number range),
+might require a lot of effort. Looking back, this was not the case. This
+repository exists because of historical circumstances. It would have been part
+of portable-hack-ast with the benefit of hindsight.
 
-Since upgrading to hhvm 6.33+ requires a lot of effort,
-I don't want features to become exclusive to the latest version.
-By giving accessories like this a home in this repository,
-I assure myself I have a place to add "extras" which can be used regardless your hhvm version.

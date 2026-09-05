@@ -168,22 +168,22 @@ function resolve_test(TestChain\Chain $chain)[]: TestChain\Chain {
         ),
 
         tuple(
-          // Invariant pseudo syntax
+          // Invariant pseudo-syntax
           'namespace A; function func1(): void { invariant(true, "Indeed"); }',
           'invariant',
         ),
         tuple(
-          // Exit pseudo syntax
+          // Exit pseudo-syntax
           'namespace A; function func1(): void { write_test(); exit(); }',
           'exit',
         ),
         tuple(
-          // Auto imported type
+          // Auto-imported type
           'namespace A; function func1(): InvariantException { return 0; }',
           'InvariantException',
         ),
         tuple(
-          // Overwriting auto imported types is evil!
+          // Overwriting auto-imported types is evil!
           'namespace A; use type IAmEvil as InvariantException; function func1(): InvariantException { return 0; }',
           'IAmEvil',
         ),

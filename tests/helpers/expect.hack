@@ -6,10 +6,10 @@ use namespace HTL\Pha;
 use function var_export_pure;
 
 /**
- * This is not fbexpect!
+ * This is not fbexpect or `HTL\expect`!
  *
- * This function and the returned object are annotated with coeffects.
- * This expect-lib allows for pure test methods in HackTest.
+ * This predates `HTL\expect`, when fbexpect was the only assertion library
+ * option. fbexpect is not coeffect annotated, whereas this `ExpectObj` is.
  */
 function expect<T>(T $value)[]: ExpectObj<T> {
   return new ExpectObj($value);
@@ -64,8 +64,8 @@ final class ExpectObj<T> {
   }
 
   /**
-   * This implements a knock-off json encoding with hex encoded integers.
-   * Reason being, hhvm 4.102 doesn't support json_encode_pure.
+   * This implements a knockoff JSON encoding with hex-encoded integers.
+   * The reason is that HHVM 4.102 doesn't support json_encode_pure.
    */
   private static function serializeValue(mixed $value)[]: string {
     if ($value is null) {
