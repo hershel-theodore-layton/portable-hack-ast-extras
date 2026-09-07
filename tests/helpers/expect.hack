@@ -3,7 +3,8 @@ namespace HTL\Pha\Tests;
 
 use namespace HH\Lib\{Str, Vec};
 use namespace HTL\Pha;
-use function var_export_pure;
+use type RuntimeException;
+use function var_export_pure, vsprintf;
 
 /**
  * This is not fbexpect or `HTL\expect`!
@@ -102,6 +103,6 @@ final class ExpectObj<T> {
     Str\SprintfFormatString $format,
     mixed ...$args
   )[]: nothing {
-    throw new \RuntimeException(\vsprintf($format, $args) as string);
+    throw new RuntimeException(vsprintf($format, $args) as string);
   }
 }
