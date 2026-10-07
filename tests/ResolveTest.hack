@@ -120,12 +120,6 @@ function resolve_test(TestChain\Chain $chain)[]: TestChain\Chain {
         ),
 
         tuple(
-          // Generics are resolved as-if they were normal names in the namespace.
-          // The caller is responsible for bookkeeping bound names in scope.
-          'namespace Some\Name\Space; function func1<T>(): T {}',
-          'Some\Name\Space\T',
-        ),
-        tuple(
           // The `_` name is special
           'namespace A; function long_function_name(): void { A as vec<_>; }',
           '_',
@@ -189,27 +183,37 @@ function resolve_test(TestChain\Chain $chain)[]: TestChain\Chain {
         ),
       ],
       (string $code, string $expected_name)[]: void ==> {
-        list($script, $token_index, $resolver) = parse($code);
+        foreach (vec[false, true] as $v2) {
+          list($script, $token_index, $resolver) = parse($code, $v2);
 
-        $name = Vec\concat(
-          Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_CLASS_NAME),
-          Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_ELEMENT_NAME),
-          Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME),
-        )
-          |> Vec\sort_by($$, Pha\node_get_source_order<>)
-          |> C\lastx($$)
-          |> Pha\resolve_name($resolver, $script, $$);
+          $name = Vec\concat(
+            Pha\index_get_nodes_by_kind($token_index, Pha\KIND_XHP_CLASS_NAME),
+            Pha\index_get_nodes_by_kind(
+              $token_index,
+              Pha\KIND_XHP_ELEMENT_NAME,
+            ),
+            Pha\index_get_nodes_by_kind($token_index, Pha\KIND_NAME),
+          )
+            |> Vec\sort_by($$, Pha\node_get_source_order<>)
+            |> C\lastx($$)
+            |> Pha\resolve_name($resolver, $script, $$);
 
-        expect($name)->toEqual($expected_name);
+          expect($name)->toEqual($expected_name);
+        }
       },
     );
 }
 
-function parse(string $code)[]: (Pha\Script, Pha\TokenIndex, Pha\Resolver) {
+function parse(
+  string $code,
+  bool $v2 = false,
+)[]: (Pha\Script, Pha\TokenIndex, Pha\Resolver) {
   $ctx = Pha\create_context();
   list($script, $ctx) = Pha\parse($code, $ctx);
   $syntax_index = Pha\create_syntax_kind_index($script);
   $token_index = Pha\create_token_kind_index($script);
-  $resolver = Pha\create_name_resolver($script, $syntax_index, $token_index);
+  $resolver = $v2
+    ? Pha\create_name_resolver_v2($script, $syntax_index, $token_index)
+    : Pha\create_name_resolver($script, $syntax_index, $token_index);
   return tuple($script, $token_index, $resolver);
 }

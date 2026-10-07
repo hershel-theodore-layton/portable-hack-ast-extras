@@ -4,11 +4,12 @@ namespace HTL\Project_qkfwww9J6CQJ\GeneratedTestChain;
 use namespace HTL\TestChain;
 use type HTL\Pragma\Pragmas;
 
-<<file: Pragmas(vec['PhaLinters', 'digest:bee1e36b034c33e56446'])>>
+<<file: Pragmas(vec['PhaLinters', 'digest:cb68a6ba5f04e6e47d82'])>>
 
 async function tests_async(
   TestChain\ChainController<\HTL\TestChain\Chain> $controller,
 )[defaults]: Awaitable<TestChain\ChainController<\HTL\TestChain\Chain>> {
   return $controller
-    ->addTestGroup(\HTL\Pha\Tests\resolve_test<>);
+    ->addTestGroup(\HTL\Pha\Tests\resolve_test<>)
+    ->addTestGroup(\HTL\Pha\Tests\resolve_v2_test<>);
 }
