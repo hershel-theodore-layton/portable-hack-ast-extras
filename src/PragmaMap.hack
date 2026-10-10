@@ -8,6 +8,13 @@ final class PragmaMap {
     private vec<(Syntax, LineAndColumnNumbers, vec<string>)> $pragmas,
   )[] {}
 
+  /**
+   * Lines are zero-based and inclusive. Columns do not affect overlap:
+   * declarations on the same line share that line's pragmas.
+   * Directive scopes include their statement's lines and the following line.
+   * Attribute scopes exclude attached leading/trailing comments; file attributes
+   * cover the whole file.
+   */
   public function getOverlappingPragmas(
     LineAndColumnNumbers $target,
   )[]: vec<vec<string>> {

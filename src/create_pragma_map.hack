@@ -30,13 +30,42 @@ function create_pragma_map(
     list_get_items_of_children($script, $node_list)
     |> Vec\map($$, $a ==> node_get_code_compressed($script, $a));
 
+  // Scope starts at syntax, not attached comments, and ends on the last
+  // token's actual line. Token text ranges have exclusive endpoints.
+  $get_scope = $node ==> {
+    if ($node === SCRIPT_NODE) {
+      return node_get_line_and_column_numbers($script, $node);
+    }
+    $tokens = node_get_descendants($script, $node)
+      |> Vec\filter($$, is_token<>)
+      |> Vec\map($$, as_token<>);
+    $first = C\firstx($tokens)
+      |> token_get_text_trivium($script, $$)
+      |> node_get_line_and_column_numbers($script, $$);
+    $last = C\lastx($tokens)
+      |> token_get_text_trivium($script, $$)
+      |> node_get_line_and_column_numbers($script, $$);
+    return new LineAndColumnNumbers(
+      $first->getStartLine(),
+      $first->getStartColumn(),
+      $last->getEndLine() - ($last->getEndColumn() === 0 ? 1 : 0),
+      $last->getEndColumn(),
+    );
+  };
+
   $parse_attributes = () ==> {
-    $pragma_to_scope = $p ==> syntax_get_parent($script, $p)
-      |> syntax_get_parent($script, $$)
-      |> syntax_get_parent($script, $$)
-      |> syntax_get_parent($script, $$)
-      |> node_get_source_range($script, $$)
-      |> source_range_to_line_and_column_numbers($script, $$);
+    $is_file_attribute =
+      create_syntax_matcher($script, KIND_FILE_ATTRIBUTE_SPECIFICATION);
+    $pragma_to_scope = $p ==> {
+      if (C\any(node_get_ancestors($script, $p), $is_file_attribute)) {
+        return node_get_line_and_column_numbers($script, SCRIPT_NODE);
+      }
+      return syntax_get_parent($script, $p)
+        |> syntax_get_parent($script, $$)
+        |> syntax_get_parent($script, $$)
+        |> syntax_get_parent($script, $$)
+        |> $get_scope($$);
+    };
 
     $pragmas = index_get_nodes_by_kind($syntax_index, KIND_CONSTRUCTOR_CALL)
       |> Vec\filter(
@@ -70,8 +99,7 @@ function create_pragma_map(
   $parse_directives = () ==> {
     $pragma_to_scope = $p ==> node_get_ancestors($script, $p)
       |> C\find($$, $is_expression_statement) ?? $p
-      |> node_get_source_range($script, $$)
-      |> source_range_to_line_and_column_numbers($script, $$)
+      |> $get_scope($$)
       |> new LineAndColumnNumbers(
         $$->getStartLine(),
         $$->getStartColumn(),
