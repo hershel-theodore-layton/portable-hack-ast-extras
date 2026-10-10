@@ -416,13 +416,19 @@ function resolve_v2_test(TestChain\Chain $chain)[]: TestChain\Chain {
       expect(Pha\resolve_name_in_ctx($resolver, $script, Pha\NIL)->getKind())
         ->toEqual(Pha\ResolverNameKind::UNKNOWN);
     })
-    ->test('legacy_context_api_rejected', () ==> {
-      list($script, $_) = Pha\parse('namespace A; function f<T>(T $x): T {}', Pha\create_context());
-      $syntax = Pha\create_syntax_kind_index($script);
-      $tokens = Pha\create_token_kind_index($script);
-      $resolver = Pha\create_name_resolver($script, $syntax, $tokens);
-      expect(Pha\resolve_name($resolver, $script, C\lastx(Pha\index_get_nodes_by_kind($tokens, Pha\KIND_NAME))))->toEqual('A\\T');
-      foreach (vec[Pha\NIL, Pha\index_get_nodes_by_kind($tokens, Pha\KIND_NAME)[0]] as $name) {
+    ->testWith2Params(
+      'legacy_context_api_rejected',
+      () ==> dict[
+        'nil node' => tuple('namespace A; function f<T>(T $x): T {}', false),
+        'name node' => tuple('namespace A; function f<T>(T $x): T {}', true),
+      ],
+      (string $source, bool $use_name) ==> {
+        list($script, $_) = Pha\parse($source, Pha\create_context());
+        $syntax = Pha\create_syntax_kind_index($script);
+        $tokens = Pha\create_token_kind_index($script);
+        $resolver = Pha\create_name_resolver($script, $syntax, $tokens);
+        expect(Pha\resolve_name($resolver, $script, C\lastx(Pha\index_get_nodes_by_kind($tokens, Pha\KIND_NAME))))->toEqual('A\\T');
+        $name = $use_name ? Pha\index_get_nodes_by_kind($tokens, Pha\KIND_NAME)[0] : Pha\NIL;
         $threw = false;
         try {
           Pha\resolve_name_in_ctx($resolver, $script, $name);
@@ -430,8 +436,8 @@ function resolve_v2_test(TestChain\Chain $chain)[]: TestChain\Chain {
           $threw = true;
         }
         expect($threw)->toEqual(true);
-      }
-    })
+      },
+    )
     ->test('configured_imports_and_sentinels', () ==> {
       list($script, $_) = Pha\parse(
         'namespace A; function f(): C\\Thing { custom(); }',
