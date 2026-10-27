@@ -6,6 +6,7 @@ use namespace HH\Lib\Vec;
 final class PragmaMap {
   public function __construct(
     private vec<(Syntax, LineAndColumnNumbers, vec<string>)> $pragmas,
+    private vec<PragmaExtractionDiagnostic> $extraction_diagnostics = vec[],
   )[] {}
 
   /**
@@ -29,5 +30,11 @@ final class PragmaMap {
   public function getAllPragmas(
   )[]: vec<(Syntax, LineAndColumnNumbers, vec<string>)> {
     return $this->pragmas;
+  }
+
+  /** Unsupported attribute arguments, separate from successfully extracted vecs. */
+  public function getExtractionDiagnostics(
+  )[]: vec<PragmaExtractionDiagnostic> {
+    return $this->extraction_diagnostics;
   }
 }

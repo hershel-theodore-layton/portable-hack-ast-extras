@@ -4,7 +4,7 @@ namespace HTL\Pha\Tests;
 use namespace HH\Lib\{Str, Vec};
 use namespace HTL\Pha;
 use type RuntimeException;
-use function var_export_pure, vsprintf;
+use function var_export_pure;
 
 /**
  * This is not fbexpect or `HTL\expect`!
@@ -28,21 +28,21 @@ final class ExpectObj<T> {
       return;
     }
 
-    static::fail(
+    static::fail(Str\format(
       "Expected `a === b`, but got:\n - %s\n - %s",
       static::serializeValue($this->value),
       static::serializeValue($other),
-    );
+    ));
   }
 
   public function toReturn()[]: void where T as (function()[]: mixed) {
     try {
       ($this->value)();
     } catch (Pha\PhaException $e) {
-      static::fail(
+      static::fail(Str\format(
         'Expected a value return, got a throw: %s',
         $e->getMessage(),
-      );
+      ));
     }
   }
 
@@ -55,11 +55,11 @@ final class ExpectObj<T> {
     } catch (Pha\PhaException $e) {
       // Implement some nice patterns later.
       if (!Str\contains($e->getMessage(), $pattern)) {
-        static::fail(
+        static::fail(Str\format(
           "Did not see the excepted pattern:\n - '%s'\n - '%s'",
           $pattern,
           $e->getMessage(),
-        );
+        ));
       }
     }
   }
@@ -99,10 +99,7 @@ final class ExpectObj<T> {
     invariant_violation('Sorry, I can not show you a diff...');
   }
 
-  private static function fail(
-    Str\SprintfFormatString $format,
-    mixed ...$args
-  )[]: nothing {
-    throw new RuntimeException(vsprintf($format, $args) as string);
+  private static function fail(string $message)[]: nothing {
+    throw new RuntimeException($message);
   }
 }

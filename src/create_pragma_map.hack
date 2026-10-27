@@ -54,46 +54,72 @@ function create_pragma_map(
   };
 
   $parse_attributes = () ==> {
-    $is_file_attribute =
-      create_syntax_matcher($script, KIND_FILE_ATTRIBUTE_SPECIFICATION);
-    $pragma_to_scope = $p ==> {
-      if (C\any(node_get_ancestors($script, $p), $is_file_attribute)) {
-        return node_get_line_and_column_numbers($script, SCRIPT_NODE);
+    $is_vec = create_syntax_matcher($script, KIND_VECTOR_INTRINSIC_EXPRESSION);
+    $pragmas = vec[];
+    $diagnostics = vec[];
+    foreach (
+      index_get_nodes_by_kind($syntax_index, KIND_CONSTRUCTOR_CALL) as $pragma
+    ) {
+      if (
+        node_get_code_compressed($script, $get_constructor_type($pragma)) !==
+          'Pragmas'
+      ) {
+        continue;
       }
-      return syntax_get_parent($script, $p)
-        |> syntax_get_parent($script, $$)
-        |> syntax_get_parent($script, $$)
-        |> syntax_get_parent($script, $$)
-        |> $get_scope($$);
-    };
-
-    $pragmas = index_get_nodes_by_kind($syntax_index, KIND_CONSTRUCTOR_CALL)
-      |> Vec\filter(
-        $$,
-        $c ==> $get_constructor_type($c)
-          |> node_get_code_compressed($script, $$) === 'Pragmas',
-      );
-
-    $effects = Vec\map(
-      $pragmas,
-      $p ==> $get_constructor_arguments($p)
-        |> list_get_items_of_children($script, $$)
-        |> Vec\map(
-          $$,
-          $vec ==>
-            as_syntax($vec) |> $get_vec_members($$) |> $parse_arguments($$),
-        ),
-    );
-
-    $out = vec[];
-    foreach ($pragmas as $i => $pragma) {
-      $scope = $pragma_to_scope($pragma);
-      foreach ($effects[$i] as $effect) {
-        $out[] = tuple($pragma, $scope, $effect);
+      // A constructor must be an immediate attribute-list item. Merely having
+      // an annotated declaration as an ancestor also matches ordinary `new`.
+      $item = syntax_get_parent($script, $pragma);
+      if (node_get_kind($script, $item) !== KIND_LIST_ITEM) {
+        continue;
+      }
+      $list = syntax_get_parent($script, $item);
+      if (node_get_kind($script, $list) !== KIND_NODE_LIST) {
+        continue;
+      }
+      $spec = syntax_get_parent($script, $list);
+      $kind = node_get_kind($script, $spec);
+      if ($kind === KIND_FILE_ATTRIBUTE_SPECIFICATION) {
+        $scope = $get_scope(SCRIPT_NODE);
+      } else if ($kind === KIND_OLD_ATTRIBUTE_SPECIFICATION) {
+        $declaration = syntax_get_parent($script, $spec);
+        if (
+          !C\contains(
+            keyset[
+              KIND_CLASSISH_DECLARATION,
+              KIND_ENUM_DECLARATION,
+              KIND_ENUM_CLASS_DECLARATION,
+              KIND_FUNCTION_DECLARATION,
+              KIND_METHODISH_DECLARATION,
+            ],
+            node_get_kind($script, $declaration),
+          )
+        ) {
+          continue;
+        }
+        $scope = $get_scope($declaration);
+      } else {
+        continue;
+      }
+      foreach (
+        list_get_items_of_children(
+          $script,
+          $get_constructor_arguments($pragma),
+        ) as $argument
+      ) {
+        if (!$is_vec($argument)) {
+          $diagnostics[] = new PragmaExtractionDiagnostic(
+            $pragma,
+            $argument,
+            'Expected a vec literal; constant expressions are not evaluated.',
+          );
+          continue;
+        }
+        $effect = $get_vec_members(as_syntax($argument))
+          |> $parse_arguments($$);
+        $pragmas[] = tuple($pragma, $scope, $effect);
       }
     }
-
-    return $out;
+    return tuple($pragmas, $diagnostics);
   };
 
   $parse_directives = () ==> {
@@ -128,14 +154,15 @@ function create_pragma_map(
   };
 
   $pragma_lines = vec[];
+  $diagnostics = vec[];
 
   if (Str\contains($source, 'use type HTL\\Pragma\\Pragmas;')) {
-    $pragma_lines = $parse_attributes();
+    list($pragma_lines, $diagnostics) = $parse_attributes();
   }
 
   if (Str\contains($source, 'use function HTL\\Pragma\\pragma;')) {
     $pragma_lines = Vec\concat($pragma_lines, $parse_directives());
   }
 
-  return new PragmaMap($pragma_lines);
+  return new PragmaMap($pragma_lines, $diagnostics);
 }

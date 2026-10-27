@@ -24,6 +24,15 @@ function pragma_scope_test(TestChain\Chain $chain)[]: TestChain\Chain {
         ),
         tuple("use function HTL\\Pragma\\pragma;\npragma('X');", vec[1, 2]),
         tuple(
+          "use type HTL\\Pragma\\Pragmas;\n// leading\n<<Pragmas(vec['X'])>>\nenum E: int {\n A = 1;\n}\n// trailing\n",
+          vec[2, 3, 4, 5],
+        ),
+        tuple(
+          "use type HTL\\Pragma\\Pragmas;\n// leading\n<<Pragmas(vec['X'])>>\nenum class E: int {\n int A = 1;\n}\n// trailing\n",
+          vec[2, 3, 4, 5],
+        ),
+
+        tuple(
           "use type HTL\\Pragma\\Pragmas;\n// leading\n<<Pragmas(vec['X'])>>\nfunction f(): void {}\nfunction g(): void {}\n",
           vec[2, 3],
         ),
